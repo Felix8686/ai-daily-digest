@@ -25,7 +25,7 @@ from jinja2 import Template
 
 TEMPLATE_PATH = Path(__file__).parent / "template.html"
 
-def render_email_html(title: str, date_str: str, article_count: int, markdown_content: str) -> str:
+def render_email_html(title: str, date_str: str, article_count: int, markdown_content: str, site_password: str = "felix8686") -> str:
     """将 Markdown 转换为带精美 CSS 样式的完整 HTML 邮件"""
     # 转换 Markdown 为 HTML，启用表格与常见扩展
     body_html = markdown.markdown(
@@ -40,7 +40,8 @@ def render_email_html(title: str, date_str: str, article_count: int, markdown_co
             title=title,
             date=date_str,
             article_count=article_count,
-            body_html=body_html
+            body_html=body_html,
+            site_password=site_password
         )
     else:
         # 极简备用 HTML

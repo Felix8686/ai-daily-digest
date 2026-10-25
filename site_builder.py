@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-静态网页与历史归档站点生成器 (支持 GitHub Pages / 自定义域名)
+静态网页与历史归档站点生成器 (含反爬虫 robots.txt、noindex 与前端密码门禁)
 """
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ WEB_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>{{ site_title }} - {{ page_title }}</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
   <style>
@@ -56,8 +57,76 @@ WEB_TEMPLATE = """<!DOCTYPE html>
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       line-height: 1.7;
-      padding: 0;
     }
+    /* 密码门禁遮罩层 */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    .auth-card h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .auth-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .auth-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      margin-bottom: 16px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .auth-card input:focus {
+      border-color: var(--primary);
+    }
+    .auth-card button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .auth-card button:hover {
+      background: var(--primary-hover);
+    }
+    .auth-error {
+      color: #ef4444;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
     .header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
@@ -90,6 +159,7 @@ WEB_TEMPLATE = """<!DOCTYPE html>
     .nav-links {
       display: flex;
       gap: 16px;
+      align-items: center;
       font-size: 14px;
     }
     .nav-links a {
@@ -98,6 +168,17 @@ WEB_TEMPLATE = """<!DOCTYPE html>
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--primary); }
+    .btn-lock {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-lock:hover { color: #ef4444; border-color: #ef4444; }
+
     .container {
       max-width: 900px;
       margin: 36px auto;
@@ -232,6 +313,19 @@ WEB_TEMPLATE = """<!DOCTYPE html>
   </style>
 </head>
 <body>
+  <!-- 密码门禁 -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <h2>🔒 私人档案库</h2>
+      <p>本站点为个人订阅精选 · 请输入访问口令</p>
+      <form id="auth-form" onsubmit="event.preventDefault(); verifyPass();">
+        <input type="password" id="pass-input" placeholder="输入访问密码" autocomplete="current-password" autofocus />
+        <button type="submit">解锁访问</button>
+        <div id="auth-err" class="auth-error">口令错误，请重试</div>
+      </form>
+    </div>
+  </div>
+
   <header class="header">
     <div class="header-inner">
       <div class="logo-area">
@@ -241,6 +335,7 @@ WEB_TEMPLATE = """<!DOCTYPE html>
       <div class="nav-links">
         <a href="/">今日最新</a>
         <a href="https://github.com/Felix8686/ai-daily-digest/issues" target="_blank">提交反馈</a>
+        <button class="btn-lock" onclick="lockSite();" title="锁定站点">🔒 锁定</button>
       </div>
     </div>
   </header>
@@ -285,17 +380,56 @@ WEB_TEMPLATE = """<!DOCTYPE html>
   <footer class="footer">
     <p>© {{ year }} 半调Felix · 基于 GitHub Actions + DeepSeek 全自动化运行 · 保持好奇心与独立思考</p>
   </footer>
+
+  <script>
+    const CORRECT_PASS = "{{ site_password }}";
+    const AUTH_KEY = "ai_digest_auth_token";
+
+    function checkAuth() {
+      const saved = localStorage.getItem(AUTH_KEY);
+      if (saved === CORRECT_PASS) {
+        document.getElementById("auth-overlay").style.display = "none";
+      } else {
+        document.getElementById("auth-overlay").style.display = "flex";
+      }
+    }
+
+    function verifyPass() {
+      const val = document.getElementById("pass-input").value.trim();
+      if (val === CORRECT_PASS) {
+        localStorage.setItem(AUTH_KEY, val);
+        document.getElementById("auth-overlay").style.display = "none";
+        document.getElementById("auth-err").style.display = "none";
+      } else {
+        document.getElementById("auth-err").style.display = "block";
+      }
+    }
+
+    function lockSite() {
+      localStorage.removeItem(AUTH_KEY);
+      document.getElementById("pass-input").value = "";
+      document.getElementById("auth-overlay").style.display = "flex";
+    }
+
+    // 立即执行校验
+    checkAuth();
+  </script>
 </body>
 </html>
 """
 
-def build_static_site(project_dir: Path, current_markdown: str, today_str: str, cname: str = "ai.felix8686.top") -> Path:
-    """生成包含 index.html 和历史归档的静态站点目录 dist/"""
+def build_static_site(project_dir: Path, current_markdown: str, today_str: str, cname: str = "ai.felix8686.top", site_password: str = "felix8686") -> Path:
+    """生成包含 index.html、robots.txt、密码遮罩与历史归档的静态站点目录 dist/"""
     dist_dir = project_dir / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
     archive_dir = project_dir / "archive"
 
-    # 1. 扫描所有历史归档
+    # 1. 生成反爬虫 robots.txt
+    robots_file = dist_dir / "robots.txt"
+    robots_file.write_text("User-agent: *\nDisallow: /\n", encoding="utf-8")
+    print("🤖 已生成反爬虫规则文件: dist/robots.txt (Disallow: /)")
+
+    # 2. 扫描所有历史归档
     archive_files = sorted(archive_dir.glob("digest-*.md"), reverse=True)
     archives_meta = []
     for f in archive_files:
@@ -308,7 +442,7 @@ def build_static_site(project_dir: Path, current_markdown: str, today_str: str, 
             "tag": "最新" if is_today else "归档"
         })
 
-    # 2. 渲染今日 index.html
+    # 3. 渲染今日 index.html
     today_body_html = markdown.markdown(current_markdown, extensions=["extra", "nl2br", "sane_lists"])
     tmpl = Template(WEB_TEMPLATE)
     index_html = tmpl.render(
@@ -317,11 +451,12 @@ def build_static_site(project_dir: Path, current_markdown: str, today_str: str, 
         date_str=today_str,
         body_html=today_body_html,
         archives=archives_meta,
-        year=dt.date.today().year
+        year=dt.date.today().year,
+        site_password=site_password
     )
     (dist_dir / "index.html").write_text(index_html, encoding="utf-8")
 
-    # 3. 渲染历史文章到 dist/archive/YYYY-MM-DD.html
+    # 4. 渲染历史文章到 dist/archive/YYYY-MM-DD.html
     dist_archive_dir = dist_dir / "archive"
     dist_archive_dir.mkdir(parents=True, exist_ok=True)
     for f in archive_files:
@@ -334,19 +469,20 @@ def build_static_site(project_dir: Path, current_markdown: str, today_str: str, 
             date_str=date_part,
             body_html=html_text,
             archives=archives_meta,
-            year=dt.date.today().year
+            year=dt.date.today().year,
+            site_password=site_password
         )
         (dist_archive_dir / f"{date_part}.html").write_text(page_html, encoding="utf-8")
 
-    # 4. 写入自定义域名 CNAME
+    # 5. 写入自定义域名 CNAME
     if cname:
         (dist_dir / "CNAME").write_text(cname.strip(), encoding="utf-8")
         print(f"🌐 已生成 CNAME 绑定: {cname}")
 
-    print(f"🚀 静态网页站点生成完毕！输出目录: {dist_dir} (包含 {len(archive_files)} 篇归档)")
+    print(f"🚀 静态网页站点生成完毕！输出目录: {dist_dir} (已配置前端口令与反爬)")
     return dist_dir
 
 if __name__ == "__main__":
     p_dir = Path(__file__).parent
     sample_md = (p_dir / "archive" / f"digest-{dt.date.today().strftime('%Y-%m-%d')}.md").read_text(encoding="utf-8")
-    build_static_site(p_dir, sample_md, dt.date.today().strftime("%Y年%m月%d日"), "ai.felix8686.top")
+    build_static_site(p_dir, sample_md, dt.date.today().strftime("%Y年%m月%d日"), "ai.felix8686.top", "felix8686")

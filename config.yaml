@@ -6,6 +6,9 @@ settings:
   language: "zh-CN"
   llm_provider: "openai_compatible"
   gemini_model: "gemini-2.5-flash"
+  site_password: "felix8686"
+  cname: "ai.felix8686.top"
+
 
 feeds:
   # 1. 行业异动、降价、重磅模型与平台风控

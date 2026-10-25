@@ -61,8 +61,9 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
     summary_md = generate_daily_digest(articles, config)
 
     # 3. 渲染为精美 HTML 邮件
+    site_pwd = config.get("settings", {}).get("site_password", "felix8686")
     print("🎨 第三步: 渲染响应式 HTML 邮件...")
-    html_content = render_email_html("AI 全景实操与行业异动精选", today_str, len(articles), summary_md)
+    html_content = render_email_html("AI 全景实操与行业异动精选", today_str, len(articles), summary_md, site_password=site_pwd)
 
     # 保存存档到本地 archive 目录
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
     # 4. 构建静态站点 (dist/ 目录)
     print("🌐 第四步: 生成个人静态网页与历史归档 (dist/)...")
     cname = config.get("settings", {}).get("cname", "ai.felix8686.top")
-    build_static_site(BASE_DIR, summary_md, today_str, cname=cname)
+    build_static_site(BASE_DIR, summary_md, today_str, cname=cname, site_password=site_pwd)
 
     if dry_run:
         preview_html_path = BASE_DIR / "preview.html"
