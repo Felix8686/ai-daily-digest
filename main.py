@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AI Daily Digest 主入口调度脚本
+AI Daily Digest 主入口调度脚本（邮件投递 + 静态网站自动构建）
 """
 from __future__ import annotations
 
@@ -15,9 +15,7 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 
 import argparse
 import datetime as dt
-
 import os
-import sys
 from pathlib import Path
 import yaml
 from dotenv import load_dotenv
@@ -25,8 +23,8 @@ from dotenv import load_dotenv
 from fetcher import fetch_all_feeds
 from summarizer import generate_daily_digest
 from mailer import render_email_html, send_digest_email
+from site_builder import build_static_site
 
-# 优先加载当前目录或上级目录的 .env 文件
 BASE_DIR = Path(__file__).parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -58,13 +56,13 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
         print("⚠️ 未抓取到任何符合条件的文章，任务结束。")
         return
 
-    # 2. 调用大模型提炼晨报
+    # 2. 调用大模型总结
     print(f"🤖 第二步: 调用大模型总结 {len(articles)} 篇新闻文章...")
     summary_md = generate_daily_digest(articles, config)
 
     # 3. 渲染为精美 HTML 邮件
     print("🎨 第三步: 渲染响应式 HTML 邮件...")
-    html_content = render_email_html("AI 行业每日早报", today_str, len(articles), summary_md)
+    html_content = render_email_html("AI 全景实操与行业异动精选", today_str, len(articles), summary_md)
 
     # 保存存档到本地 archive 目录
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
@@ -72,6 +70,11 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
     archive_file = ARCHIVE_DIR / f"digest-{today_tag}.md"
     archive_file.write_text(summary_md, encoding="utf-8")
     print(f"💾 今日简报已自动存档至: {archive_file}")
+
+    # 4. 构建静态站点 (dist/ 目录)
+    print("🌐 第四步: 生成个人静态网页与历史归档 (dist/)...")
+    cname = config.get("settings", {}).get("cname", "ai.felix8686.top")
+    build_static_site(BASE_DIR, summary_md, today_str, cname=cname)
 
     if dry_run:
         preview_html_path = BASE_DIR / "preview.html"
@@ -83,13 +86,13 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
         print("=" * 90)
         return
 
-    # 4. 发送邮件
-    print("📧 第四步: 正在通过 SMTP 发送至订阅邮箱...")
+    # 5. 发送邮件
+    print("📧 第五步: 正在通过 SMTP 发送至订阅邮箱...")
     send_digest_email(subject, html_content, summary_md)
-    print("✅ 今日推送任务全部完成！")
+    print("✅ 今日推送与网页构建任务全部完成！")
 
 def main():
-    parser = argparse.ArgumentParser(description="AI Daily Digest 自动化邮件推送系统")
+    parser = argparse.ArgumentParser(description="AI Daily Digest 自动化邮件推送与静态站点系统")
     parser.add_argument("--dry-run", action="store_true", help="仅抓取并生成本地 HTML/MD 预览，不发送邮件")
     parser.add_argument("--test-mail", action="store_true", help="仅测试 SMTP 发信配置是否正常")
     args = parser.parse_args()

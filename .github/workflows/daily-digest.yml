@@ -1,16 +1,25 @@
-name: AI Daily Digest
+name: AI Daily Digest & Web Publisher
 
 on:
   schedule:
     # 每天北京时间早上 08:00 自动触发 (UTC 00:00)
     - cron: '0 0 * * *'
-  workflow_dispatch: # 支持在 GitHub 仓库 Actions 页面手动点击一键运行
+  workflow_dispatch: # 支持手动点击一键运行
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  run-digest:
+  run-digest-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 执行抓取、AI 总结与邮件投递
+      - name: 执行抓取、AI 总结、邮件投递与静态站点生成
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
@@ -41,6 +50,18 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
         run: |
           python main.py
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传构建产物至 Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: 自动保存每日归档简报至仓库
         continue-on-error: true
