@@ -42,7 +42,7 @@ def load_config() -> dict:
 def run_digest(dry_run: bool = False, test_mail: bool = False):
     config = load_config()
     today_str = dt.date.today().strftime("%Y年%m月%d日")
-    subject = f"⚡ 【AI 每日早报】{today_str} 全球前沿与行业动向精选"
+    subject = f"⚡ 【AI 提效与实操精选】{today_str} · 写作选题与上手工具"
 
     if test_mail:
         print("🧪 正在执行测试发信模式...")

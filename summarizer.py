@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-大模型提炼与总结模块
-支持 Google Gemini (推荐) 与 OpenAI 兼容接口 (DeepSeek, 阿里百炼等)
+大模型提炼与总结模块（接地气·个人实操与内容创作定制版）
 """
 from __future__ import annotations
 
@@ -15,38 +14,49 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
         pass
 
 import os
-
 import json
 import datetime as dt
 
-SYSTEM_PROMPT = """你是一名资深的全球 AI 科技主编兼投资分析师。
-你的任务是将传入的全球 AI 行业多源新闻与技术文章，加工为一份极具信息价值、结构严谨、语言精炼的【AI 行业每日晨报】。
+SYSTEM_PROMPT = """你是一名专注于「个人生产力落地、轻量自动化与个人知识库」的资深内容主编。
+你的读者是一位微信公众号主理人（公众号「半调Felix」），其核心定位是：
+「以真诚、非程序员、接地气的普通人视角，输出高质量 AI 提效、工具实操、思维认知与变现经验，杜绝空洞假大空的 AI 味与公关说辞」。
 
-输出规范与格式要求：
-1. 语言：简体中文。
-2. 过滤噪声：剔除毫无实质内容的公关稿与重复同质化新闻，精选最关键事件。
-3. 结构分块：
-   - 🌟 【今日头条 / Top Stories】：精选 2~3 条最具行业冲击力的重大事件，附带 1 句精炼的影响力点评。
-   - 🤖 【大厂动态与模型进展】：涵盖 OpenAI、Google、Anthropic、开源模型（Llama/Qwen 等）的核心发布与迭代。
-   - 🛠️ 【实用工具与落地产品】：适合开发者或职场人的高生产力 AI 工具、Agent 平台或开源项目。
-   - 💡 【深度观察与学术研究】：重磅 Paper（如 Hugging Face 趋势）、行业政策或专栏观点。
-4. 每条条目格式：
-   - **[文章标题(翻译为精炼中文)](原始URL)** (来源: 媒体名称)
-   - 1~2 句直接说明「核心更新是什么」以及「对开发者/行业的意义」，拒绝废话。
-5. 末尾生成一句话「今日行业思考 / Takeaway」。
+【绝对禁止收录（一票否决）】：
+- ❌ 任何关于美国大选、政治立场、海外两党争论的内容。
+- ❌ 任何地方性立法案、海外政策研讨会文稿。
+- ❌ 任何脱离个人实际的宏大底层基建（如 10 亿用户超大规模分布式数据中心架构）。
+- ❌ 科技巨头高管人事变动、八卦诉讼或资本估值吹嘘。
+
+【必须遵循的四大板块与筛选准绳】：
+从输入的多源素材中，严格挑选与普通人、个人创作者、轻量开发者强相关的 6~8 条高价值信息，按以下板块呈现：
+
+1. 🎯 【公众号爆款选题与实战灵感】（精选 1~2 条）
+   - 最值得拆解成推文写给读者的选题（贴合：小白、踩坑、复盘、避坑、真实体验）。
+   - 附带 1 句【写作切入点建议】：教读者如何从普通人角度去写。
+
+2. 🛠️ 【今天就能上手玩的新神器】（精选 2~3 条）
+   - 点开链接就能免费玩或低门槛试用的新产品、新网站、Chrome 插件或桌面小工具。
+   - 说明：它是干嘛的？怎么帮我省时间？
+
+3. 🧠 【个人知识库与 Agent 玩法】（精选 1~2 条）
+   - 与个人知识沉淀（如 Obsidian、Markdown）、单人轻量 Agent（如 Hermes 体系）、实用 Prompt 或高性价比模型调用（如 DeepSeek、端侧模型）相关的实操动态。
+
+4. 💡 【独立变现与避坑提醒】（精选 1 条）
+   - 单人单机利用 AI 探索副业、变现或自动化流程的案例复盘；或揭露虚假宣传、收割智商税的排雷提醒。
+
+【排版格式】：
+- Markdown 格式输出。
+- 每条包含：**[文章/工具标题(翻译为接地气中文)](原始链接)** (来源: 媒体名称)
+- 语言风格：精炼干脆、通俗易懂、直击痛点，拒绝打官腔与假大空。
 """
 
 def summarize_with_gemini(articles: list[dict], api_key: str, model_name: str = "gemini-2.5-flash") -> str:
     """使用 Google GenAI 官方 SDK 调用 Gemini"""
-    try:
-        from google import genai
-        from google.genai import types
-    except ImportError:
-        raise ImportError("请先安装 google-genai: pip install google-genai")
+    from google import genai
+    from google.genai import types
 
     client = genai.Client(api_key=api_key)
 
-    # 组装文章列表提示词
     items_text = []
     for idx, item in enumerate(articles, 1):
         items_text.append(
@@ -58,11 +68,11 @@ def summarize_with_gemini(articles: list[dict], api_key: str, model_name: str = 
     articles_payload = "\n\n".join(items_text)
 
     prompt = f"""今天是 {dt.date.today().strftime('%Y年%m月%d日')}。
-以下是从各官方源与顶级科技媒体抓取的最新资讯素材（共 {len(articles)} 条）：
+以下是从各实操源、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
 
 {articles_payload}
 
-请严格按照规范生成今天的【AI 每日早报】（以优雅的 Markdown 格式输出）。"""
+请严格按照规范生成今天的【AI 实操与提效每日精选】（以优雅的 Markdown 格式输出）。"""
 
     response = client.models.generate_content(
         model=model_name,
@@ -75,7 +85,7 @@ def summarize_with_gemini(articles: list[dict], api_key: str, model_name: str = 
     return response.text
 
 def summarize_with_openai_compatible(articles: list[dict], api_key: str, base_url: str | None = None, model_name: str = "deepseek-chat") -> str:
-    """使用 OpenAI 兼容协议（如 DeepSeek, Moonshot, 阿里百炼等）"""
+    """使用 OpenAI 兼容协议（DeepSeek 等）"""
     import requests
 
     endpoint = f"{base_url.rstrip('/')}/chat/completions" if base_url else "https://api.openai.com/v1/chat/completions"
@@ -91,11 +101,11 @@ def summarize_with_openai_compatible(articles: list[dict], api_key: str, base_ur
     articles_payload = "\n\n".join(items_text)
 
     prompt = f"""今天是 {dt.date.today().strftime('%Y年%m月%d日')}。
-以下是从各官方源与顶级科技媒体抓取的最新资讯素材（共 {len(articles)} 条）：
+以下是从各实操源、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
 
 {articles_payload}
 
-请严格按照规范生成今天的【AI 每日早报】（以优雅的 Markdown 格式输出）。"""
+请严格按照系统设定的规范生成今天的【AI 实操与提效每日精选】（以优雅的 Markdown 格式输出）。"""
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -120,45 +130,19 @@ def generate_daily_digest(articles: list[dict], config: dict) -> str:
         return "今日暂无满足筛选条件的重大新闻更新。"
 
     settings = config.get("settings", {})
-    provider = settings.get("llm_provider", "gemini")
+    provider = settings.get("llm_provider", "openai_compatible")
 
-    # 优先检测环境变量中的 Key
     gemini_key = os.environ.get("GEMINI_API_KEY")
     openai_key = os.environ.get("OPENAI_API_KEY")
 
     if provider == "gemini" and gemini_key:
-        print("🧠 正在使用 Google Gemini 生成每日摘要...")
+        print("🧠 正在使用 Google Gemini 生成实操精选...")
         model = settings.get("gemini_model", "gemini-2.5-flash")
         return summarize_with_gemini(articles, api_key=gemini_key, model_name=model)
     elif openai_key:
-        print("🧠 正在使用 OpenAI 兼容 API 生成每日摘要...")
-        base_url = os.environ.get("OPENAI_BASE_URL")
+        print("🧠 正在使用 DeepSeek (OpenAI 协议) 生成实操精选...")
+        base_url = os.environ.get("OPENAI_BASE_URL", "https://api.deepseek.com")
         model = os.environ.get("OPENAI_MODEL", "deepseek-chat")
         return summarize_with_openai_compatible(articles, api_key=openai_key, base_url=base_url, model_name=model)
     else:
-        print("⚠️ 未检测到 API Key，正在以本地离线摘要模式生成预览...")
-        # 本地离线样例模式
-        mock_lines = [
-            "## 🌟 【今日头条 / Top Stories】",
-            f"- **[{articles[0]['title']}]({articles[0]['link']})** (来源: {articles[0]['source']})",
-            f"  > 摘要概述: {articles[0]['summary'][:120]}...",
-            "",
-            "## 🤖 【大厂动态与模型进展】"
-        ]
-        for a in articles[1:4]:
-            mock_lines.append(f"- **[{a['title']}]({a['link']})** (来源: {a['source']})")
-            mock_lines.append(f"  {a['summary'][:100]}...\n")
-
-        mock_lines.extend([
-            "## 🛠️ 【实用工具与落地产品】",
-        ])
-        for a in articles[4:7]:
-            mock_lines.append(f"- **[{a['title']}]({a['link']})** (来源: {a['source']})")
-            mock_lines.append(f"  {a['summary'][:100]}...\n")
-
-        mock_lines.extend([
-            "## 💡 【今日行业思考 / Takeaway】",
-            "全球 AI 产业正加速从「单点模型发布」向「工程化落地与垂直商业化」延伸，端侧大模型与垂直 Agent 生态进入爆发期。"
-        ])
-        return "\n".join(mock_lines)
-
+        raise ValueError("未检测到有效的 API Key！请配置 GEMINI_API_KEY 或 OPENAI_API_KEY。")
