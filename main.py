@@ -74,7 +74,7 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
 
     # 4. 构建静态站点 (dist/ 目录)
     print("🌐 第四步: 生成个人静态网页与历史归档 (dist/)...")
-    cname = config.get("settings", {}).get("cname", "ai.felix8686.top")
+    cname = config.get("settings", {}).get("cname", "news.felix8686.top")
     build_static_site(BASE_DIR, summary_md, today_str, cname=cname, site_password=site_pwd)
 
     if dry_run:

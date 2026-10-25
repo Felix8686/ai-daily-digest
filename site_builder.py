@@ -418,7 +418,7 @@ WEB_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
-def build_static_site(project_dir: Path, current_markdown: str, today_str: str, cname: str = "ai.felix8686.top", site_password: str = "felix8686") -> Path:
+def build_static_site(project_dir: Path, current_markdown: str, today_str: str, cname: str = "news.felix8686.top", site_password: str = "felix8686") -> Path:
     """生成包含 index.html、robots.txt、密码遮罩与历史归档的静态站点目录 dist/"""
     dist_dir = project_dir / "dist"
     dist_dir.mkdir(parents=True, exist_ok=True)
@@ -485,4 +485,4 @@ def build_static_site(project_dir: Path, current_markdown: str, today_str: str, 
 if __name__ == "__main__":
     p_dir = Path(__file__).parent
     sample_md = (p_dir / "archive" / f"digest-{dt.date.today().strftime('%Y-%m-%d')}.md").read_text(encoding="utf-8")
-    build_static_site(p_dir, sample_md, dt.date.today().strftime("%Y年%m月%d日"), "ai.felix8686.top", "felix8686")
+    build_static_site(p_dir, sample_md, dt.date.today().strftime("%Y年%m月%d日"), "news.felix8686.top", "felix8686")

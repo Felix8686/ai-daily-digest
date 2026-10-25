@@ -7,7 +7,7 @@ settings:
   llm_provider: "openai_compatible"
   gemini_model: "gemini-2.5-flash"
   site_password: "felix8686"
-  cname: "ai.felix8686.top"
+  cname: "news.felix8686.top"
 
 
 feeds:
