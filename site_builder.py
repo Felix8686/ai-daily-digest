@@ -345,7 +345,6 @@ WEB_TEMPLATE = """<!DOCTYPE html>
       <div class="post-meta">
         <span class="badge">🔥 闭环精选</span>
         <span>📅 {{ date_str }}</span>
-        <span>✍️ 主理人: 半调Felix</span>
       </div>
       <article class="article-body">
         {{ body_html | safe }}
