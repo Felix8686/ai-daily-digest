@@ -1,0 +1,51 @@
+# AI Daily Digest 订阅源配置文件
+
+settings:
+  # 抓取最近多少小时内更新的文章（默认 24 小时）
+  time_window_hours: 24
+  # 每个源最多抓取条数
+  max_items_per_feed: 5
+  # 每日简报语言: zh-CN 或 en
+  language: "zh-CN"
+  # 大模型提供商: openai_compatible (如 DeepSeek) 或 gemini
+  llm_provider: "openai_compatible"
+  gemini_model: "gemini-2.5-flash"
+
+# 信息源列表
+feeds:
+  - name: "Google AI / DeepMind"
+    category: "大厂官方动态"
+    url: "https://blog.google/technology/ai/rss/"
+
+  - name: "OpenAI News"
+    category: "大厂官方动态"
+    url: "https://openai.com/news/rss.xml"
+
+  - name: "Hugging Face Blog"
+    category: "前沿开源与研究"
+    url: "https://huggingface.co/blog/feed.xml"
+
+  - name: "TechCrunch AI"
+    category: "行业媒体与商业"
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+
+  - name: "The Verge"
+    category: "行业媒体与商业"
+    url: "https://www.theverge.com/rss/index.xml"
+
+  - name: "Import AI (Jack Clark)"
+    category: "深度观察与政策"
+    url: "https://importai.substack.com/feed"
+
+  - name: "Interconnects (Nathan Lambert)"
+    category: "深度观察与模型"
+    url: "https://www.interconnects.ai/feed"
+
+  - name: "量子位"
+    category: "中文前沿资讯"
+    url: "https://www.qbitai.com/feed"
+
+  - name: "少数派 (AI与生产力)"
+    category: "中文前沿资讯"
+    url: "https://sspai.com/feed"
+
