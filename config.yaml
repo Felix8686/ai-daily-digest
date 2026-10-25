@@ -1,4 +1,4 @@
-# AI Daily Digest 订阅源配置文件（接地气·个人实操与内容创作版）
+# AI Daily Digest 订阅源配置文件（全景实操·闭环系统版）
 
 settings:
   time_window_hours: 36
@@ -8,26 +8,37 @@ settings:
   gemini_model: "gemini-2.5-flash"
 
 feeds:
+  # 1. 行业异动、降价、重磅模型与平台风控
+  - name: "量子位 (国内生态与大模型动态)"
+    category: "大模型动态与降价"
+    url: "https://www.qbitai.com/feed"
+
+  - name: "OpenAI News (官方动态与接口变更)"
+    category: "大厂官方动态"
+    url: "https://openai.com/news/rss.xml"
+
+  - name: "Google AI / DeepMind"
+    category: "大厂官方动态"
+    url: "https://blog.google/technology/ai/rss/"
+
+  # 2. 上手神器、独立开发与本地平替
   - name: "Product Hunt AI"
-    category: "新产品与上手神器"
+    category: "上手神器与新产品"
     url: "https://www.producthunt.com/feed"
 
-  - name: "Show HN (独立开发者新项目)"
+  - name: "Show HN (独立开发者项目)"
     category: "独立开发与新工具"
     url: "https://hnrss.org/show"
 
-  - name: "宝玉的分享 (Prompt与AI思考)"
-    category: "实战技巧与爆款选题"
+  - name: "Simon Willison (实用Agent与本地生态)"
+    category: "本地平替与实操"
+    url: "https://simonwillison.net/atom/everything/"
+
+  # 3. 创作者选题、Prompt与避坑思考
+  - name: "宝玉的分享 (Prompt与深度思考)"
+    category: "创作者实操与选题"
     url: "https://baoyu.io/feed.xml"
 
   - name: "少数派 (个人数字生活与AI提效)"
     category: "个人生产力与工作流"
     url: "https://sspai.com/feed"
-
-  - name: "Simon Willison (实用AI与Agent)"
-    category: "前沿实操与Agent"
-    url: "https://simonwillison.net/atom/everything/"
-
-  - name: "量子位 (前沿中文落地动态)"
-    category: "国内模型与生态"
-    url: "https://www.qbitai.com/feed"
