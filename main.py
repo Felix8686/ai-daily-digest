@@ -51,7 +51,7 @@ def run_digest(dry_run: bool = False, test_mail: bool = False):
 
     # 1. 抓取新闻源素材
     print("🚀 第一步: 开始抓取配置的订阅源素材...")
-    articles = fetch_all_feeds(config)
+    articles = fetch_all_feeds(config, archive_dir=ARCHIVE_DIR)
     if not articles:
         print("⚠️ 未抓取到任何符合条件的文章，任务结束。")
         return

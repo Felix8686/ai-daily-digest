@@ -483,5 +483,16 @@ def build_static_site(project_dir: Path, current_markdown: str, today_str: str, 
 
 if __name__ == "__main__":
     p_dir = Path(__file__).parent
-    sample_md = (p_dir / "archive" / f"digest-{dt.date.today().strftime('%Y-%m-%d')}.md").read_text(encoding="utf-8")
-    build_static_site(p_dir, sample_md, dt.date.today().strftime("%Y年%m月%d日"), "news.felix8686.top", "felix8686")
+
+    archive_dir = p_dir / "archive"
+    archive_files = sorted(archive_dir.glob("digest-*.md"), reverse=True)
+    if archive_files:
+        latest_file = archive_files[0]
+        date_part = latest_file.stem.replace("digest-", "")
+        parts = date_part.split("-")
+        date_str = f"{parts[0]}年{parts[1]}月{parts[2]}日" if len(parts) == 3 else date_part
+        content = latest_file.read_text(encoding="utf-8")
+        build_static_site(p_dir, content, date_str, "news.felix8686.top", "felix8686")
+    else:
+        print("⚠️ 未找到历史归档")
+

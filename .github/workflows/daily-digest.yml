@@ -1,13 +1,17 @@
-name: AI Daily Digest & Web Publisher
+name: Deploy Static Web to GitHub Pages
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # 支持手动点击一键运行
+    paths:
+      - 'archive/**'
+      - 'site_builder.py'
+      - '.github/workflows/daily-digest.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run-digest-and-deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -37,19 +41,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 执行抓取、AI 总结、邮件投递与静态站点生成
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+      - name: 生成静态站点 (dist/)
         run: |
-          python main.py
+          python site_builder.py
 
       - name: 配置 GitHub Pages
         uses: actions/configure-pages@v5
@@ -62,16 +56,3 @@ jobs:
       - name: 部署到 GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: 自动保存每日归档简报至仓库
-        continue-on-error: true
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add archive/
-          if git diff --staged --quiet; then
-            echo "没有新的归档生成"
-          else
-            git commit -m "chore: 归档每日 AI 晨报 $(date +'%Y-%m-%d')"
-            git push
-          fi
