@@ -24,7 +24,7 @@ feeds:
     category: "大厂官方动态"
     url: "https://blog.google/technology/ai/rss/"
 
-  # 2. 上手神器、独立开发与本地平替
+  # 2. 上手神器、独立开发与本地平替（含 GitHub 第一阵地）
   - name: "Product Hunt AI"
     category: "上手神器与新产品"
     url: "https://www.producthunt.com/feed"
@@ -33,11 +33,27 @@ feeds:
     category: "独立开发与新工具"
     url: "https://hnrss.org/show"
 
+  - name: "GitHub Trending (全语言开源热榜)"
+    category: "开源热榜与新工具"
+    url: "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml"
+
+  - name: "GitHub Trending (Python/AI热榜)"
+    category: "开源热榜与新工具"
+    url: "https://mshibanami.github.io/GitHubTrendingRSS/daily/python.xml"
+
   - name: "Simon Willison (实用Agent与本地生态)"
     category: "本地平替与实操"
     url: "https://simonwillison.net/atom/everything/"
 
-  # 3. 创作者选题、Prompt与避坑思考
+  # 3. X(推特)一手爆款、前沿实操与选题（含 X 第一阵地）
+  - name: "AlphaSignal (X前沿爆款与新模型)"
+    category: "X前沿趋势与爆款"
+    url: "https://alphasignal.ai/feed.xml"
+
+  - name: "Ben's Bites (X热门AI实操与新玩法)"
+    category: "X热门实操与新玩法"
+    url: "https://www.bensbites.com/feed"
+
   - name: "宝玉的分享 (Prompt与深度思考)"
     category: "创作者实操与选题"
     url: "https://baoyu.io/feed.xml"
