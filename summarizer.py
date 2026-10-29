@@ -8,8 +8,8 @@ from __future__ import annotations
 import sys
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
+        sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
+        sys.stderr.reconfigure(encoding="utf-8", line_buffering=True)
     except Exception:
         pass
 
@@ -27,6 +27,13 @@ SYSTEM_PROMPT = """你是一名专注于「个人生产力落地、轻量自动�
 - ❌ 任何脱离个人实际的 10 亿级分布式数据中心基建架构。
 - ❌ 科技巨头高管人事变动、纯资本估值宣发与虚浮的战略合作签约。
 - ❌ 任何往期已经报道过或反复翻炒的旧闻、老选题，严禁炒冷饭。
+- ❌ 读者已熟知并日常使用的工具栈（严禁作为“新发布/新工具/新神器”推荐）：
+  读者已深度使用并自建了如下工具与工作流：
+  - Agent-Reach（免 API 读小红书/X/B站等平台，读者已安装并长期使用）
+  - Hermes / 自建自动化系统（读者本人的自动化底座）
+  - Obsidian（个人知识库）
+  - OpenCLI / OpenViking / Book-to-Kindle 等。
+  若上述工具再次出现在 GitHub 热榜或社交网络上，坚决一票否决，严禁作为新工具安利推荐！
 
 【宁缺毋滥与去重原则】：
 - 每一条推荐必须是真正有新鲜增量、可落地的新动态。

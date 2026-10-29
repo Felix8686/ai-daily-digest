@@ -8,7 +8,26 @@ settings:
   gemini_model: "gemini-2.5-flash"
   site_password: "felix8686"
   cname: "news.felix8686.top"
+  # GitHub 新项目最大天数限制（超过此天数的老项目二次翻红不作为新工具）
+  github_max_repo_age_days: 90
 
+filters:
+  # 读者已知、已安装或日常使用的工具与技能（一律不作为新工具推荐）
+  known_tools:
+    - "agent-reach"
+    - "Panniantong/Agent-Reach"
+    - "opencli"
+    - "openviking"
+    - "hermes"
+    - "obsidian"
+    - "book-to-kindle"
+    - "ai-radar"
+    - "article-adapter"
+    - "video-library-sorter"
+    - "wechat-viral-evaluator"
+    - "baoyu-article-illustrator"
+    - "baoyu-cover-image"
+    - "baoyu-format-markdown"
 
 feeds:
   # 1. 行业异动、降价、重磅模型与平台风控
