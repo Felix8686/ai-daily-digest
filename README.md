@@ -1,104 +1,128 @@
-# ⚡ AI Daily Digest - 全球 AI 行业每日早报自动化推送
+# ⚡ AI Daily Digest · AI 提效与商业变现周刊
 
-自动化抓取全球顶尖 AI 实验室、前沿科技媒体与行业周刊素材，利用 Google Gemini 大模型提炼关键进展，并通过 GitHub Actions 每天早上 8:00 定时生成精美排版邮件投递到你的邮箱。**完全零服务器成本、零运维维护。**
+> 专注 **AI商业变现案例、落地实操、轻量自动化架构与自媒体内容选题** 的全自动情报生成与静态站点系统。  
+> 每日早上 08:00 自动抓取全球一手信源，经大模型结构化提炼后自动发布至私有静态站点。
 
----
-
-## 🌟 特性概览
-
-*   **多源聚合**：内置 Google DeepMind、OpenAI、Hugging Face、TechCrunch、Import AI、Interconnects、机器之心、量子位等权威源。
-*   **智能降噪**：大模型剔除纯商业 PR 稿，自动提炼「核心更新」与「行业深远影响」，拒绝对比复读。
-*   **精美排版**：自适应响应式 HTML 邮件模板，支持暗色模式，保留原始新闻可点击跳转链接。
-*   **零成本运行**：依赖免费的 GitHub Actions 定时任务 + Google Gemini API 免费层 + 个人邮箱 SMTP。
-*   **自动归档**：每次生成的简报自动留存于 `archive/` 目录供日后检索。
+🌐 **在线站点**：[news.felix8686.top](https://news.felix8686.top)  
+🔒 **访问口令**：`felix8686`（客户端 `localStorage` 记忆保护）
 
 ---
 
-## 🚀 3 步快速部署到 GitHub Actions
+## 🌟 核心特性与架构
 
-### 第一步：创建 GitHub 仓库并推送代码
+```
+[多平台一手信源] ──> [抓取与三重防护过滤] ──> [LLM 结构化提炼] ──> [现代化静态站构建] ──> [GitHub Pages 部署]
+ (变现/工具/实操)    (去重 / 黑名单 / 年龄)     (五大闭环核心专栏)      (news.felix8686.top)     (全自动生效)
+```
 
-在本地项目根目录初始化并推送到你的 GitHub（私有或公开仓库均可）：
+1. **纯静态网页驱动，下线邮件依赖**：
+   - 全面转向独立网页沉浸式阅读，告别邮件垃圾箱拦截与格式错乱。
+   - 适配移动端与桌面端自适应排版，支持**明暗主题手动/跟随系统切换**。
+   - 配备**顶部阅读进度条**、**分类快速跳转胶囊**与**历史归档按日检索**。
 
-```bash
-cd ai-daily-digest
-git init
-git add .
-git commit -m "feat: initial commit for ai daily digest"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/<你的仓库名>.git
-git push -u origin main
+2. **五大闭环核心专栏**：
+   - ⚡ **【行业异动：新模型 · 降价 · 羊毛福利 · 接口预警】**：大厂重磅模型、API 降价与免费额度调整、Breaking Changes 预警。
+   - 💰 **【商业变现与一人公司打法】**：独立开发微型 SaaS、海外一人团队 0 到 1 赚钱案例、出海套利与 MRR 营收拆解（每条必附【商业启发】）。
+   - 💻 **【本地平替与上手神器】**：普通电脑或 Mac 即刻可跑的端侧工具、零门槛省时神器，坚决剔除脱离实际的学术底层推导。
+   - 🎯 **【创作者风控与爆款选题】**：公众号与社交媒体风控红线、X 爆款 Agent 玩法与黑客实操（附带【写作切入点建议】）。
+   - 🔍 **【暗改排雷与避坑打假】**：揭露厂商缩水降级、虚假开源噱头，为工具选型省钱避坑。
+
+3. **三重防幻觉与去噪防线**：
+   - **跨天排重（14 天历史库）**：严格剔除往期简报已报道过的重复链接。
+   - **已知技能/工具黑名单拦截**：自动扫描本机与云端已安装工具（如 `agent-reach`、`opencli`、`hermes` 等），绝不把读者已知熟知的工具二次推荐为“新神器”。
+   - **GitHub 仓库年龄深度鉴伪**：校验 GitHub 仓库首次创建时间（默认上限 90 天），自动拦截开源已久、仅靠短期刷星翻红的老旧项目。
+
+---
+
+## 🛠️ 项目结构
+
+```
+ai-daily-digest/
+├── config.yaml          # 订阅源列表、时间窗口、已知工具黑名单与站点参数
+├── fetcher.py           # RSS 抓取清洗、跨天去重、仓库年龄鉴伪与黑名单过滤
+├── summarizer.py        # 5 大专栏系统提示词（Prompt）与 LLM 调用逻辑
+├── site_builder.py      # 现代化静态网页生成器（含密码门禁、主题切换、反爬配置）
+├── main.py              # 主调度入口（抓取 -> 提炼 -> 归档 -> 构建站点）
+├── template.html        # 响应式邮件备用模板
+├── mailer.py            # SMTP 发信组件（可选备用）
+├── archive/             # 历史简报 Markdown 存档库 (digest-YYYY-MM-DD.md)
+├── dist/                # 静态网页输出目录（自动生成 robots.txt 与 CNAME）
+└── .github/workflows/   # GitHub Actions 自动化部署到 Pages 工作流
 ```
 
 ---
 
-### 第二步：配置 GitHub Secrets（密钥）
+## 🚀 本地运行与调度
 
-进入 GitHub 仓库页面，点击 **Settings** $\to$ **Secrets and variables** $\to$ **Actions** $\to$ **New repository secret**，添加以下配置项：
+### 1. 安装依赖
+```bash
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
-| 变量名 | 必填 | 示例 / 说明 |
-| :--- | :---: | :--- |
-| `GEMINI_API_KEY` | 是 | [Google AI Studio 免费申请](https://aistudio.google.com/) 的 API Key |
-| `SMTP_HOST` | 是 | 邮箱 SMTP 服务器（如 QQ 为 `smtp.qq.com`，163 为 `smtp.163.com`） |
-| `SMTP_PORT` | 是 | 端口（SSL 推荐填 `465`） |
-| `SMTP_USER` | 是 | 发件人邮箱地址（如 `yourname@qq.com`） |
-| `SMTP_PASS` | 是 | 邮箱**授权码 / 应用密码**（非邮箱登录密码，需在邮箱设置开启 POP3/SMTP 获得） |
-| `RECEIVER_EMAIL` | 是 | 接收晨报的邮箱地址（可填自己的邮箱，多个以英文逗号分隔） |
+pip install -r requirements.txt
+```
 
-> 💡 如果想使用 DeepSeek 或其他国产模型，也可以添加 `OPENAI_API_KEY` 和 `OPENAI_BASE_URL`。
+### 2. 配置环境变量 (`.env`)
+复制 `.env.example` 为 `.env` 并填写相关模型 Key：
+```ini
+# 大模型配置（推荐 DeepSeek）
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.deepseek.com
+OPENAI_MODEL=deepseek-chat
 
----
+# 可选 GitHub Token（用于提升 GitHub 仓库年龄检查的 API 配额）
+GITHUB_TOKEN=ghp_...
+```
 
-### 第三步：手动触发测试
+### 3. 执行运行命令
+```bash
+# 正常执行：抓取、AI提炼、归档 Markdown 并生成静态网页 dist/
+python main.py
 
-1. 点击仓库顶部的 **Actions** 标签页。
-2. 在左侧点击 **AI Daily Digest** 工作流。
-3. 点击右侧 **Run workflow** 下拉按钮，点击绿色的 **Run workflow** 按钮。
-4. 几分钟后，查看工作流运行日志，打开你的收件箱查收首份 AI 行业晨报！
+# 预览模式：仅抓取并提炼输出控制台，不更新归档
+python main.py --dry-run
 
-*(默认定时为每天北京时间早上 08:00 自动触发，如需修改时间可编辑 `.github/workflows/daily-digest.yml` 中的 cron 表达式)*
+# 仅重新构建静态网页（将 archive/ 中的历史简报重新编译为 HTML）
+python site_builder.py
 
----
-
-## 💻 本地运行与调试
-
-如果想在本地直接测试抓取与效果：
-
-1. **安装依赖**：
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **配置环境变量**：
-   ```bash
-   copy .env.example .env
-   # 编辑 .env 文件填入你的 GEMINI_API_KEY
-   ```
-
-3. **本地模拟预览（不实际发信）**：
-   ```bash
-   python main.py --dry-run
-   ```
-   *程序将抓取最新文章、生成总结并输出 `preview.html`，可在浏览器直接打开查看效果。*
-
-4. **测试 SMTP 发信**：
-   ```bash
-   python main.py --test-mail
-   ```
+# 如需临时额外发送一份邮件给配置邮箱
+python main.py --send-mail
+```
 
 ---
 
-## 🛠️ 自定义订阅源
+## ⚙️ 订阅源管理 (`config.yaml`)
 
-打开 [`config.yaml`](config.yaml) 文件，按需增删 RSS 订阅源或调整时间窗口：
+修改 [`config.yaml`](config.yaml) 即可增删订阅源或调整过滤策略：
 
 ```yaml
 settings:
-  time_window_hours: 24   # 抓取过去多少小时内的文章
-  max_items_per_feed: 5   # 单源最大抓取条数
+  time_window_hours: 36         # 抓取最近 36 小时内的文章
+  max_items_per_feed: 5         # 单源最多保留条数
+  enable_email: false           # 邮件推送默认关闭（纯网页驱动）
+  github_max_repo_age_days: 90  # GitHub 仓库最大天数限制
+
+filters:
+  known_tools:                  # 读者已知工具黑名单
+    - "agent-reach"
+    - "hermes"
+    - "opencli"
 
 feeds:
-  - name: "自定义媒体名"
-    category: "大厂官方动态"
-    url: "https://example.com/feed.xml"
+  - name: "Growth in Reverse (一人商业变现与MRR拆解)"
+    category: "商业变现与一人公司"
+    url: "https://growthinreverse.com/feed/"
+  ...
 ```
+
+---
+
+## 🔒 静态站点安全与部署机制
+
+1. **反爬与防索引**：自动在输出目录生成 `robots.txt`（`Disallow: /`），并在所有页面 `head` 中注入 `noindex, nofollow, noarchive`。
+2. **自动化发布**：
+   - 云端定时任务每日 08:00 运行 `main.py`，生成新归档并推送至 GitHub 仓库。
+   - GitHub Actions 监听 `archive/**` 变动，自动运行 `site_builder.py` 并通过 GitHub Pages 零延迟发布。
