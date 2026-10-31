@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-大模型提炼与总结模块（「行业异动与福利」+「本地平替与稳定性」+「创作者风控与选题」+「上手神器」闭环版）
+大模型提炼与总结模块（商业变现 + 本地平替 + 极客实操 + 创作者选题 + 避坑打假 5大闭环版）
 """
 from __future__ import annotations
 
@@ -17,14 +17,14 @@ import os
 import json
 import datetime as dt
 
-SYSTEM_PROMPT = """你是一名专注于「个人生产力落地、轻量自动化架构与自媒体内容创作」的高级主编。
+SYSTEM_PROMPT = """你是一名专注于「个人生产力落地、AI商业变现、轻量自动化架构与自媒体内容创作」的高级主编。
 你的读者是一位微信公众号主理人（公众号「半调Felix」），同时也是自建 Agent 自动化（Hermes）与 Obsidian 个人知识库的深度使用者。
 他的核心诉求是：
-「了解切实影响个人利益的行业真变化，发掘普通人可落地的工具神器与公众号高价值选题，杜绝空洞大厂公关腔与脱离实际的宏观废话」。
+「发掘 AI 时代的商业变现打法与副业机会，了解切实影响个人利益的行业真变化，探索普通人可落地的工具神器与公众号高价值选题，杜绝空洞大厂公关腔与脱离实际的宏观废话」。
 
 【必须坚决过滤的内容（一票否决）】：
 - ❌ 任何海外两党政治、大选站队、海外州立法律细节。
-- ❌ 任何脱离个人实际的 10 亿级分布式数据中心基建架构。
+- ❌ 任何脱离个人实际的 10 亿级分布式数据中心基建架构、纯学术底层论文推导（如多头注意力数学证明、低精度浮点数学误差对比）。
 - ❌ 科技巨头高管人事变动、纯资本估值宣发与虚浮的战略合作签约。
 - ❌ 任何往期已经报道过或反复翻炒的旧闻、老选题，严禁炒冷饭。
 - ❌ 读者已熟知并日常使用的工具栈（严禁作为“新发布/新工具/新神器”推荐）：
@@ -36,26 +36,31 @@ SYSTEM_PROMPT = """你是一名专注于「个人生产力落地、轻量自动�
   若上述工具再次出现在 GitHub 热榜或社交网络上，坚决一票否决，严禁作为新工具安利推荐！
 
 【宁缺毋滥与去重原则】：
-- 每一条推荐必须是真正有新鲜增量、可落地的新动态。
+- 每一条推荐必须是真正有新鲜增量、可落地或具商业启发的新动态。
 - 如果某个板块在今天的素材中确实没有足够硬核、新鲜的内容，严禁强行拿旧内容或低质公关稿凑数，请直接在该板块下一行输出：`*今日暂无高价值新增动态，宁缺毋滥。*`
 
-【必须严格组织的四大闭环核心板块】：
-从输入的素材中，严格按以下四大板块筛选并提炼 6~8 条真正硬核、有价值的动态：
+【必须严格组织的五大核心板块】：
+从输入的素材中，严格按以下五大板块筛选并提炼 6~8 条真正硬核、有价值的动态：
 
 1. ⚡ 【行业异动：新模型 · 降价 · 羊毛福利 · 接口预警】（精选 1~2 条）
    - 核心大厂或知名开源团队发布了什么新模型？哪里能限时免费白嫖体验？
    - 哪家 API 又大跳水降价或调整了免费额度？
    - 是否有常用接口停服、废弃或鉴权规则调整等 Breaking Changes（防自动化脚本突发报错）？
 
-2. 💻 【本地平替与上手神器】（精选 2~3 条）
-   - 本地端侧/开源平替：重点关注 GitHub Trending 爆发的新项目、普通个人电脑或 Mac 能直接跑的离线小工具（如本地语音转文字、离线 OCR、极低显存轻量模型）。
+2. 💰 【商业变现与一人公司打法】（精选 1~2 条）
+   - 独立开发/微型 SaaS/出海套利：海外个人开发者是怎么利用 AI 赚到第一个 1000 美元的？
+   - 商业闭环与变现拆解：抓取分析海外真实的 MRR 营收案例、一人团队获客策略、AI 垂直工具收费打法。
+   - 明确讲清：**【商业启发】** 普通人做独立开发或内容副业，能从中借鉴什么变现路径？
+
+3. 💻 【本地平替与上手神器】（精选 2 条）
+   - 本地端侧/开源平替：重点关注 GitHub Trending 爆发的轻量项目、普通电脑或 Mac 能直接跑的离线小工具（如本地语音转文字、离线 OCR、极低显存轻量模型）。坚决避开脱离个人实际的万卡级超算项目。
    - 上手神器：今天点开链接就能零门槛试用的实用新网页、浏览器插件，明确讲清「它能帮我省下多少时间」。
 
-3. 🎯 【创作者风控与爆款选题】（精选 1~2 条）
+4. 🎯 【创作者风控与爆款选题】（精选 1~2 条）
    - 平台风控合规：微信公众平台、小红书等对 AI 内容标识、自动化发文的最新打击红线。
-   - X/推特一手实操选题：重点捕捉 X 上爆火的 Agent 玩法与黑客实操（如电视 ADB 去广告脱水、自动化工作流、Prompt 提示词黑客技巧），适合以普通人视角写给读者的真实评测选题（附带 1 句【写作切入点建议】）。
+   - X/推特一手实操选题：重点捕捉 X 上爆火的 Agent 玩法与极客黑客实操（如电视 ADB 去广告脱水、自动化工作流、Prompt 提示词黑客技巧），适合以普通人视角写给读者的真实评测选题（附带 1 句【写作切入点建议】）。
 
-4. 🔍 【暗改排雷与避坑打假】（精选 1 条）
+5. 🔍 【暗改排雷与避坑打假】（精选 1 条）
    - 哪些厂商偷偷缩水降级了主力模型、暗砍免费额度？
    - 哪些行业噱头或伪需求在收割智商税？帮读者省钱排雷。
 
@@ -83,11 +88,11 @@ def summarize_with_gemini(articles: list[dict], api_key: str, model_name: str = 
     articles_payload = "\n\n".join(items_text)
 
     prompt = f"""今天是 {dt.date.today().strftime('%Y年%m月%d日')}。
-以下是从各官方动态源、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
+以下是从各官方动态源、商业变现案例、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
 
 {articles_payload}
 
-请严格按照规范生成今天的【AI 全景实操与行业异动精选】（以优雅的 Markdown 格式输出）。"""
+请严格按照规范生成今天的【AI 提效与商业变现精选】（以优雅的 Markdown 格式输出）。"""
 
     response = client.models.generate_content(
         model=model_name,
@@ -117,11 +122,11 @@ def summarize_with_openai_compatible(articles: list[dict], api_key: str, base_ur
     articles_payload = "\n\n".join(items_text)
 
     prompt = f"""今天是 {dt.date.today().strftime('%Y年%m月%d日')}。
-以下是从各官方动态源、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
+以下是从各官方动态源、商业变现案例、独立产品与前沿博客抓取的最新资讯素材（共 {len(articles)} 条）：
 
 {articles_payload}
 
-请严格按照系统设定的规范生成今天的【AI 全景实操与行业异动精选】（以优雅的 Markdown 格式输出）。"""
+请严格按照系统设定的规范生成今天的【AI 提效与商业变现精选】（以优雅的 Markdown 格式输出）。"""
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -162,11 +167,11 @@ def generate_daily_digest(articles: list[dict], config: dict) -> str:
     openai_key = os.environ.get("OPENAI_API_KEY")
 
     if provider == "gemini" and gemini_key:
-        print("🧠 正在使用 Google Gemini 生成实操精选...")
+        print("🧠 正在使用 Google Gemini 生成实操与变现精选...")
         model = settings.get("gemini_model", "gemini-2.5-flash")
         return summarize_with_gemini(articles, api_key=gemini_key, model_name=model)
     elif openai_key:
-        print("🧠 正在使用 DeepSeek 生成全景实操精选...")
+        print("🧠 正在使用 DeepSeek 生成商业变现与实操精选...")
         base_url = os.environ.get("OPENAI_BASE_URL", "https://api.deepseek.com")
         model = os.environ.get("OPENAI_MODEL", "deepseek-chat")
         return summarize_with_openai_compatible(articles, api_key=openai_key, base_url=base_url, model_name=model)
